@@ -1,89 +1,135 @@
-﻿using System;
+﻿//Исходный файл Students.dat при открытии дает ошибку, поэтому создал свой, ну а дальше все по плану задачи 
+
+using System;
 using System.IO;
 using System.Text;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
+using FinalTask;
 
-class ApplicationTask4
+class Task4
 {
     const string fileName = $"e:/Students.dat";
 
-    [Serializable]
-    class Student
+    public static void CreateTestFile(string path)
     {
-        public string Name { get; set; }
-        public string Group { get; set; }
-        public DateTime DateOfBirth { get; set; }
-        public Student(string name, string group, DateTime dateofbirth)
+        List<Student> students = new List<Student>();
+        //Student[] student = new Student[6];
+        students.Add(new Student("Василий", "G - 151", new DateTime(2004, 3, 11, 0, 0, 0)));
+        students.Add(new Student("Петр", "G - 150", new DateTime(2004, 5, 22, 0, 0, 0)));
+        students.Add(new Student("Евгений", "G - 152", new DateTime(2004, 1, 12, 0, 0, 0)));
+        students.Add(new Student("Анна", "G - 151", new DateTime(2004, 11, 15, 0, 0, 0)));
+        students.Add(new Student("Эдуард", "G - 150", new DateTime(2004, 9, 6, 0, 0, 0)));
+        students.Add(new Student("Полина", "G - 151", new DateTime(2004, 12, 10, 0, 0, 0)));
+
+        try
         {
-            Name = name;
-            Group = group;
-            DateOfBirth = dateofbirth;
+            BinaryFormatter formatter = new BinaryFormatter();
+            using (FileStream fs = new FileStream(path, FileMode.Create))
+            {
+
+                formatter.Serialize(fs, students);
+
+            }
+
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Ошибка сериализации: {0}", ex.Message);
+        }
+
+
     }
 
+    
     static void Main()
     {
+        
+        if (!File.Exists(fileName))
+            CreateTestFile(fileName);
+        
         ReadValues();
-       // DisplayValues();
+    
     }
 
     public static void ReadValues()
     {
-        string File1= $"e:/Test.txt";
+        string path =  @"e:\Students";
+        if (!Directory.Exists(path))
+            Directory.CreateDirectory(path);
+
+        List<string> groups = new List<string>();
+
         if (File.Exists(fileName))
         {
             List<Student> students = new List<Student>();
-
-            //var str =File.ReadAllText(fileName);
-            //string str1 = "";
-            //str1 = str.Substring(319);
-            //StreamWriter sw = new StreamWriter(File1);
-            ////Write a line of text
-            //sw.WriteLine(str1);            
-            //sw.Close();
-
-            ////Console.WriteLine(str);
-
-            //using (StreamReader reader = new StreamReader(File1)) //  fileName
-            ////using (BinaryReader reader = new BinaryReader(File.Open(fileName, FileMode.Open))) ;
-            //{
-            //    int i = 0;
-            //    int Len = 39;
-            //    str1 = "";
-            //    char[] str2 = new char[Len]; ;
-            //    while (!reader.EndOfStream)
-            //    {
-
-            //        reader.ReadBlock(str2, i, Len);
-            //        Console.WriteLine(str2.ToString());
-            //        //var newStudent = (Student) str2.ToString();
-            //        i += Len;
-            //    }
-
-
 
             FileStream fs;
             try
             {
                 using (fs = new FileStream(fileName, FileMode.Open))  //
                 {
-                    BinaryFormatter formatter = new BinaryFormatter();
-                    //var newStudent = (Student) formatter.Deserialize(fs);
+                    BinaryFormatter formatter = new BinaryFormatter();                    
                     students = (List<Student>)formatter.Deserialize(fs);
-                    // students.Add(newStudent);
+                    
                 }
                 fs.Close();
 
-                //    Console.WriteLine($"Имя: {newPerson.Name} Группа: {newPerson.Group} Дата рождения: {newPerson.DateOfBirth}");
             }
             catch (SerializationException e)
             {
-                Console.WriteLine("Failed to deserialize. Reason: " + e.Message);
-                //throw;
-            }
-        
-        }
+                Console.WriteLine("Ошибка десериализации, причина: " + e.Message);
 
+            }
+            foreach (Student s in students)
+            {
+                if (!groups.Contains(s.Group))
+                    groups.Add(s.Group);
+            }
+            foreach(string g in groups)
+            {
+                var groupstudents = students.Where(s => s.Group == g);
+
+                string groupfile = Path.Combine(path, g +".txt");
+                if (File.Exists(groupfile))
+                    File.Delete(groupfile); //чистим мусор от прежних запусков
+
+                string strggroup="";
+
+                
+                   
+                StreamWriter w;
+                try
+                {
+                    var textfile = new FileInfo(groupfile);
+                    using (w = textfile.AppendText())
+                    {                      
+                    foreach (Student st in groupstudents)
+                    {
+                        w.WriteLine(st.Name + " " + st.DateOfBirth.ToString("D"));
+                         //   strggroup +=  + "/";
+                    }
+                        w.Close();
+                    }
+
+                }
+                catch (Exception ex)
+                { Console.WriteLine("Не получается добавить запись в файл {0}: {1}", groupfile, ex.Message); }
+                //finally
+                //{
+                //    w.Close();
+                //}
+            }
+
+            //Console.WriteLine("Имя: {0} Группа: {1} Дата рождения: {2}", s.Name, s.Group, s.DateOfBirth.ToString("D"));
+
+            //    ///Пишем по категории в текстовый файл
+            //    string Grouppath = Path.Combine(path, s.Group.Trim() + ".txt");
+               
+
+            }
+
+        }
     }
-}
+
+
