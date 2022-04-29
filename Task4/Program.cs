@@ -41,20 +41,20 @@ class Task4
 
     }
 
-    
+
     static void Main()
     {
-        
+
         if (!File.Exists(fileName))
             CreateTestFile(fileName);
-        
+
         ReadValues();
-    
+
     }
 
     public static void ReadValues()
     {
-        string path =  @"e:\Students";
+        string path = @"e:\Students";
         if (!Directory.Exists(path))
             Directory.CreateDirectory(path);
 
@@ -69,9 +69,9 @@ class Task4
             {
                 using (fs = new FileStream(fileName, FileMode.Open))  //
                 {
-                    BinaryFormatter formatter = new BinaryFormatter();                    
+                    BinaryFormatter formatter = new BinaryFormatter();
                     students = (List<Student>)formatter.Deserialize(fs);
-                    
+
                 }
                 fs.Close();
 
@@ -86,50 +86,41 @@ class Task4
                 if (!groups.Contains(s.Group))
                     groups.Add(s.Group);
             }
-            foreach(string g in groups)
+            foreach (string g in groups)
             {
                 var groupstudents = students.Where(s => s.Group == g);
 
-                string groupfile = Path.Combine(path, g +".txt");
+                string groupfile = Path.Combine(path, g + ".txt");
                 if (File.Exists(groupfile))
                     File.Delete(groupfile); //чистим мусор от прежних запусков
 
-                string strggroup="";
+                string strggroup = "";
 
-                
-                   
+
+
                 StreamWriter w;
                 try
                 {
                     var textfile = new FileInfo(groupfile);
                     using (w = textfile.AppendText())
-                    {                      
-                    foreach (Student st in groupstudents)
                     {
-                        w.WriteLine(st.Name + " " + st.DateOfBirth.ToString("D"));
-                         //   strggroup +=  + "/";
-                    }
+                        foreach (Student st in groupstudents)
+                        {
+                            w.WriteLine(st.Name + " " + st.DateOfBirth.ToString("D"));
+                            //   strggroup +=  + "/";
+                        }
                         w.Close();
                     }
 
                 }
                 catch (Exception ex)
                 { Console.WriteLine("Не получается добавить запись в файл {0}: {1}", groupfile, ex.Message); }
-                //finally
-                //{
-                //    w.Close();
-                //}
-            }
 
-            //Console.WriteLine("Имя: {0} Группа: {1} Дата рождения: {2}", s.Name, s.Group, s.DateOfBirth.ToString("D"));
-
-            //    ///Пишем по категории в текстовый файл
-            //    string Grouppath = Path.Combine(path, s.Group.Trim() + ".txt");
-               
 
             }
 
         }
     }
+}
 
 
