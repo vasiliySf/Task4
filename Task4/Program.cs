@@ -94,10 +94,7 @@ class Task4
                 if (File.Exists(groupfile))
                     File.Delete(groupfile); //чистим мусор от прежних запусков
 
-                string strggroup = "";
-
-
-
+                
                 StreamWriter w;
                 try
                 {
@@ -107,7 +104,7 @@ class Task4
                         foreach (Student st in groupstudents)
                         {
                             w.WriteLine(st.Name + " " + st.DateOfBirth.ToString("D"));
-                            //   strggroup +=  + "/";
+                           
                         }
                         w.Close();
                     }
